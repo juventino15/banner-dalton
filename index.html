@@ -126,10 +126,17 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
 .progress-bar-wrap { background: var(--color-background-secondary); border-radius: 20px; height: 5px; overflow: hidden; margin: 8px 0; }
 .progress-bar { height: 100%; background: #D32F2F; border-radius: 20px; transition: width 0.3s; }
 .thumb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 12px; }
-.thumb-item { border-radius: 7px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
-.thumb-item img { width: 100%; display: block; }
+.thumb-item { border-radius: 7px; overflow: hidden; border: 1.5px solid var(--color-border-tertiary); transition: all 0.15s; position:relative; }
+.thumb-item.selected { border-color: #D32F2F; }
+.thumb-item .thumb-img-wrap { position: relative; cursor: pointer; }
+.thumb-item img { width: 100%; display: block; transition: opacity 0.15s; }
+.thumb-item:not(.selected) img { opacity: 0.5; }
+.thumb-check { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.95); border: 1.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; transition: all 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.thumb-item.selected .thumb-check { background: #D32F2F; border-color: #D32F2F; }
+.thumb-item.selected .thumb-check::after { content: ''; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px,-1px); }
 .thumb-name { padding: 4px 7px; font-size: 10px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .thumb-dl { display: block; text-align: center; padding: 4px; font-size: 10px; color: #D32F2F; text-decoration: none; border-top: 0.5px solid var(--color-border-tertiary); }
+.thumb-toolbar { display:flex; align-items:center; gap:8px; margin-top:10px; padding:8px 10px; background:var(--color-background-secondary); border-radius:var(--border-radius-md); flex-wrap:wrap; }
 
 /* ── Hot Sale panel ── */
 .hs-step { display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -170,7 +177,7 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
       <span style="font-size:13px;">⚙️</span>
       <span>Banner Generator Dalton</span>
       <span style="opacity:0.7;">·</span>
-      <span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:10px;">v8.2</span>
+      <span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:10px;">v8.3</span>
     </div>
   </div>
 
@@ -925,14 +932,75 @@ async function genAll(m) {
     blobs[m].push({ blob, fname, title: car.title, carIdx: list[i] });
     const url = URL.createObjectURL(blob);
     const div = document.createElement('div');
-    div.className = 'thumb-item';
-    div.innerHTML = `<img src="${url}" loading="lazy"><div class="thumb-name">${car.title}</div><a class="thumb-dl" href="${url}" download="${fname}"><i class="ti ti-download"></i> Descargar</a>`;
+    div.className = 'thumb-item selected';
+    div.dataset.idx = blobs[m].length - 1;
+    div.innerHTML = `
+      <div class="thumb-img-wrap" onclick="toggleThumbSel(${m},${blobs[m].length - 1})">
+        <img src="${url}" loading="lazy">
+        <div class="thumb-check"></div>
+      </div>
+      <div class="thumb-name">${car.title}</div>
+      <a class="thumb-dl" href="${url}" download="${fname}"><i class="ti ti-download"></i> Descargar</a>`;
     document.getElementById('thumbGrid'+m).appendChild(div);
+    blobs[m][blobs[m].length - 1].selected = true;
   }
 
   document.getElementById('progTxt'+m).innerHTML = '<span style="color:var(--color-text-success)"><i class="ti ti-circle-check"></i> ¡'+list.length+' banners listos!</span>';
   document.getElementById('zipBtn'+m).style.display = 'inline-flex';
+  // Add toolbar above thumb grid
+  const grid = document.getElementById('thumbGrid'+m);
+  if (!document.getElementById('thumbToolbar'+m)) {
+    const tb = document.createElement('div');
+    tb.className = 'thumb-toolbar';
+    tb.id = 'thumbToolbar'+m;
+    tb.innerHTML = `
+      <button class="btn btn-sm" onclick="selectAllThumbs(${m})"><i class="ti ti-checks"></i> Todos</button>
+      <button class="btn btn-sm" onclick="selectNoneThumbs(${m})"><i class="ti ti-x"></i> Ninguno</button>
+      <span class="badge" id="thumbSelBadge${m}">${list.length} seleccionados</span>
+      <span style="font-size:10px;color:var(--color-text-tertiary);">Haz clic en un banner para seleccionarlo/deseleccionarlo</span>`;
+    grid.parentNode.insertBefore(tb, grid);
+  } else {
+    document.getElementById('thumbSelBadge'+m).textContent = list.length + ' seleccionados';
+  }
   updateHsBtn();
+}
+
+function toggleThumbSel(m, idx) {
+  if (!blobs[m] || !blobs[m][idx]) return;
+  blobs[m][idx].selected = !blobs[m][idx].selected;
+  const els = document.querySelectorAll('#thumbGrid'+m+' .thumb-item');
+  if (els[idx]) els[idx].classList.toggle('selected', blobs[m][idx].selected);
+  updateThumbBadge(m);
+  updateHsBtn();
+}
+
+function selectAllThumbs(m) {
+  if (!blobs[m]) return;
+  blobs[m].forEach((b, i) => {
+    b.selected = true;
+    const els = document.querySelectorAll('#thumbGrid'+m+' .thumb-item');
+    if (els[i]) els[i].classList.add('selected');
+  });
+  updateThumbBadge(m);
+  updateHsBtn();
+}
+
+function selectNoneThumbs(m) {
+  if (!blobs[m]) return;
+  blobs[m].forEach((b, i) => {
+    b.selected = false;
+    const els = document.querySelectorAll('#thumbGrid'+m+' .thumb-item');
+    if (els[i]) els[i].classList.remove('selected');
+  });
+  updateThumbBadge(m);
+  updateHsBtn();
+}
+
+function updateThumbBadge(m) {
+  if (!blobs[m]) return;
+  const sel = blobs[m].filter(b => b.selected).length;
+  const badge = document.getElementById('thumbSelBadge'+m);
+  if (badge) badge.textContent = sel + ' de ' + blobs[m].length + ' seleccionados';
 }
 
 async function genBoth() {
@@ -964,9 +1032,13 @@ let hsXlsxBlob = null;
 
 function updateHsBtn() {
   const m = parseInt(document.getElementById('hsMarco')?.value || '1');
-  const hasBlobs = blobs[m] && blobs[m].length > 0;
+  const list = blobs[m] || [];
+  const selCount = list.filter(b => b.selected).length;
   const btn = document.getElementById('hsUploadBtn');
-  if (btn) btn.disabled = !hasBlobs;
+  if (btn) {
+    btn.disabled = selCount === 0;
+    btn.innerHTML = `<i class="ti ti-cloud-upload" aria-hidden="true"></i> Subir + Generar XLSX${selCount > 0 ? ' ('+selCount+')' : ''}`;
+  }
 }
 
 function hsLog(msg) {
@@ -1012,8 +1084,10 @@ async function uploadToCloudinary(blob, publicId, folder) {
 async function uploadAndExport() {
   const m = parseInt(document.getElementById('hsMarco').value);
   const folder = (document.getElementById('cloudFolder').value || 'banners_hotsale').trim();
-  const list = blobs[m];
-  if (!list || !list.length) { alert('Genera primero los banners del marco seleccionado.'); return; }
+  const allBlobs = blobs[m];
+  if (!allBlobs || !allBlobs.length) { alert('Genera primero los banners del marco seleccionado.'); return; }
+  const list = allBlobs.filter(b => b.selected);
+  if (!list.length) { alert('Selecciona al menos un banner para exportar.'); return; }
 
   // Reset UI
   hsXlsxBlob = null;
