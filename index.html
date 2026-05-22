@@ -977,16 +977,28 @@ async function uploadToCloudinary(blob, publicId, folder) {
   if (folder) fd.append('folder', folder);
   fd.append('resource_type', 'image');
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, {
-    method: 'POST',
-    body: fd
-  });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error?.message || res.statusText);
+  // 30 second timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, {
+      method: 'POST',
+      body: fd,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.secure_url;
+  } catch(e) {
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') throw new Error('Timeout (30s)');
+    throw e;
   }
-  const data = await res.json();
-  return data.secure_url;
 }
 
 async function uploadAndExport() {
@@ -1014,8 +1026,8 @@ async function uploadAndExport() {
     document.getElementById('hsProgTxt').textContent = `Subiendo ${i+1} de ${list.length}…`;
     document.getElementById('hsProgCount').textContent = `${i+1}/${list.length}`;
 
-    // public_id = fname sin extensión
-    const publicId = fname.replace(/\.png$/i, '');
+    // public_id = fname sin extensión (jpg o png)
+    const publicId = fname.replace(/\.(png|jpg|jpeg)$/i, '');
     hsLog(`⬆️ <strong>${title}</strong>`);
 
     let imageUrl = '';
@@ -1023,10 +1035,14 @@ async function uploadAndExport() {
       imageUrl = await uploadToCloudinary(blob, publicId, folder);
       hsLog(`&nbsp;&nbsp;✅ ${imageUrl}`);
     } catch(e) {
-      hsLog(`&nbsp;&nbsp;❌ Error: ${e.message}`);
-      errors.push(`${title}: ${e.message}`);
+      hsLog(`&nbsp;&nbsp;❌ Error: ${e.message || 'desconocido'}`);
+      errors.push(`${title}: ${e.message || 'error desconocido'}`);
     }
 
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 150));
+
+    const b = list[i];
     const car = (b.carIdx !== undefined && allCars[b.carIdx]) ? allCars[b.carIdx] : allCars.find(c => c.title === b.title) || {};
     carRows.push({ car, imageUrl });
   }
