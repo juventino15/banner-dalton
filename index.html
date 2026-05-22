@@ -99,6 +99,16 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
 .strike-toggle { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); margin-left: auto; }
 .strike-toggle input { accent-color: #D32F2F; cursor: pointer; }
 
+/* ── Price mode ── */
+.price-mode-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.price-mode-opt { display:flex; align-items:flex-start; gap:8px; padding:9px 11px; border:1.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); cursor:pointer; transition:all 0.15s; background:var(--color-background-primary); }
+.price-mode-opt:hover { background:var(--color-background-secondary); }
+.price-mode-opt:has(input:checked) { border-color:#D32F2F; background:#fff8f8; }
+.price-mode-opt input { accent-color:#D32F2F; margin-top:2px; cursor:pointer; }
+.pm-title { font-size:12px; font-weight:600; color:var(--color-text-primary); }
+.pm-sub { font-size:10px; color:var(--color-text-tertiary); margin-top:2px; }
+.pm-sub code { background:var(--color-background-secondary); padding:1px 4px; border-radius:3px; font-size:9px; }
+
 /* ── Buttons ── */
 .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); transition: all 0.15s; }
 .btn:hover { background: var(--color-background-secondary); }
@@ -122,6 +132,7 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
 .car-name { font-size: 11px; font-weight: 500; color: var(--color-text-primary); line-height: 1.3; padding-right: 16px; }
 .car-mkt { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; }
 .car-rem { font-size: 10px; color: #C62828; font-weight: 600; }
+.car-gar { font-size: 10px; color: #2E7D32; font-weight: 600; margin-top: 1px; }
 .no-rem { font-size: 10px; color: var(--color-text-tertiary); }
 .progress-bar-wrap { background: var(--color-background-secondary); border-radius: 20px; height: 5px; overflow: hidden; margin: 8px 0; }
 .progress-bar { height: 100%; background: #D32F2F; border-radius: 20px; transition: width 0.3s; }
@@ -177,7 +188,7 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
       <span style="font-size:13px;">⚙️</span>
       <span>Banner Generator Dalton</span>
       <span style="opacity:0.7;">·</span>
-      <span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:10px;">v8.3</span>
+      <span style="background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:10px;font-size:10px;">v8.4</span>
     </div>
   </div>
 
@@ -259,6 +270,29 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
               <div class="color-item"><input type="color" class="color-swatch" id="m1cMkt" value="#1A1A1A" oninput="schedPreview(1)"><span>Precio mercado</span></div>
               <div class="color-item"><input type="color" class="color-swatch" id="m1cRem" value="#1A1A1A" oninput="schedPreview(1)"><span>Precio remate</span></div>
               <div class="strike-toggle"><input type="checkbox" id="m1chkStrike" checked onchange="schedPreview(1)"><span>Tachar mercado</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price mode panel -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-icon">💰</div><div class="panel-title">Modo de precio remate</div></div>
+          <div class="panel-body">
+            <div class="price-mode-row">
+              <label class="price-mode-opt">
+                <input type="radio" name="m1priceMode" value="sale" checked onchange="schedPreview(1);renderPickerList(1)">
+                <div>
+                  <div class="pm-title">Precio remate normal</div>
+                  <div class="pm-sub">Columna <code>sale_price</code></div>
+                </div>
+              </label>
+              <label class="price-mode-opt">
+                <input type="radio" name="m1priceMode" value="garantia" onchange="schedPreview(1);renderPickerList(1)">
+                <div>
+                  <div class="pm-title">Precio con garantía 🛡️</div>
+                  <div class="pm-sub">Columna <code>precio_con_garantia</code></div>
+                </div>
+              </label>
             </div>
           </div>
         </div>
@@ -375,6 +409,29 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
           </div>
         </div>
 
+        <!-- Price mode panel -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-icon">💰</div><div class="panel-title">Modo de precio remate</div></div>
+          <div class="panel-body">
+            <div class="price-mode-row">
+              <label class="price-mode-opt">
+                <input type="radio" name="m2priceMode" value="sale" checked onchange="schedPreview(2);renderPickerList(2)">
+                <div>
+                  <div class="pm-title">Precio remate normal</div>
+                  <div class="pm-sub">Columna <code>sale_price</code></div>
+                </div>
+              </label>
+              <label class="price-mode-opt">
+                <input type="radio" name="m2priceMode" value="garantia" onchange="schedPreview(2);renderPickerList(2)">
+                <div>
+                  <div class="pm-title">Precio con garantía 🛡️</div>
+                  <div class="pm-sub">Columna <code>precio_con_garantia</code></div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /controls -->
 
       <!-- PREVIEW -->
@@ -428,6 +485,7 @@ input[type=range] { width: 100%; accent-color: #D32F2F; }
           <select onchange="filterByRemate(this.value)" id="remateFilter">
             <option value="all">Todos</option>
             <option value="remate">Con precio remate</option>
+            <option value="garantia">Con precio garantía 🛡️</option>
             <option value="noremate">Sin precio remate</option>
           </select>
         </div>
@@ -617,9 +675,18 @@ function renderPickerList(m) {
   }
   filtered.forEach(({c, i}) => {
     const hasRem = c.sale_price && !isNaN(+c.sale_price);
+    const hasGar = c.precio_con_garantia && !isNaN(+c.precio_con_garantia);
+    const mode = document.querySelector(`input[name="m${m}priceMode"]:checked`)?.value || 'sale';
+    let badge = '';
+    if (mode === 'garantia') {
+      if (hasGar) badge = '<span class="item-badge" style="background:#E8F5E9;color:#2E7D32;border-color:#A5D6A7;">🛡️ garantía</span>';
+      else if (hasRem) badge = '<span class="item-badge">🔥 remate</span>';
+    } else {
+      if (hasRem) badge = '<span class="item-badge">🔥 remate</span>';
+    }
     const div = document.createElement('div');
     div.className = 'car-picker-item' + (pickerState[m].selectedIdx === i ? ' selected' : '');
-    div.innerHTML = `<span class="item-name">${c.title}</span>${hasRem ? '<span class="item-badge">🔥 remate</span>' : ''}`;
+    div.innerHTML = `<span class="item-name">${c.title}</span>${badge}`;
     div.onclick = () => selectPickerItem(m, i, c.title);
     list.appendChild(div);
   });
@@ -646,6 +713,20 @@ document.addEventListener('click', e => {
 
 // ── State ──────────────────────────────────────────────────────────
 let allCars = [], visibleIdxs = [], selected = new Set();
+
+// Get the right remate price for a car based on marco's price mode
+function getRematePrice(m, car) {
+  if (!car) return null;
+  const mode = document.querySelector(`input[name="m${m}priceMode"]:checked`)?.value || 'sale';
+  if (mode === 'garantia') {
+    if (car.precio_con_garantia && !isNaN(+car.precio_con_garantia)) return +car.precio_con_garantia;
+    // fallback to sale_price if no garantia value
+    if (car.sale_price && !isNaN(+car.sale_price)) return +car.sale_price;
+    return null;
+  }
+  if (car.sale_price && !isNaN(+car.sale_price)) return +car.sale_price;
+  return null;
+}
 
 // Per-marco state
 const frames   = { 1: null, 2: null };
@@ -741,11 +822,13 @@ function renderGrid(idxs) {
     const c = allCars[i];
     const mkt = fmt(c.market_price || c.price);
     const rem = c.sale_price && !isNaN(+c.sale_price) ? fmt(+c.sale_price) : null;
+    const gar = c.precio_con_garantia && !isNaN(+c.precio_con_garantia) ? fmt(+c.precio_con_garantia) : null;
     return `<div class="car-card${selected.has(i)?' sel':''}" id="cc${i}" onclick="tog(${i})">
       <div class="cb"></div>
       <div class="car-name">${c.title}</div>
       <div class="car-mkt">Mercado: ${mkt}</div>
       ${rem ? '<div class="car-rem">Remate: '+rem+'</div>' : '<div class="no-rem">Sin precio remate</div>'}
+      ${gar ? '<div class="car-gar">🛡️ Con garantía: '+gar+'</div>' : ''}
     </div>`;
   }).join('');
   updSel();
@@ -789,7 +872,11 @@ function applyFilters(q, remF) {
     const c = allCars[i];
     const matchQ = !q || (c.title||'').toLowerCase().includes(lq);
     const hasRem = c.sale_price && !isNaN(+c.sale_price);
-    const matchR = remF === 'all' || (remF === 'remate' && hasRem) || (remF === 'noremate' && !hasRem);
+    const hasGar = c.precio_con_garantia && !isNaN(+c.precio_con_garantia);
+    const matchR = remF === 'all'
+      || (remF === 'remate' && hasRem)
+      || (remF === 'garantia' && hasGar)
+      || (remF === 'noremate' && !hasRem);
     return matchQ && matchR;
   });
   renderGrid(visibleIdxs);
@@ -884,10 +971,11 @@ async function renderBanner(m, ctx, W, H, car) {
     }
   }
 
-  // Remate price (both marcos)
-  const remVal = car && car.sale_price && !isNaN(+car.sale_price)
-    ? fmt(+car.sale_price)
-    : (car ? null : '$280,000');
+  // Remate price (both marcos) — based on price mode
+  const remPriceVal = getRematePrice(m, car);
+  const remVal = car
+    ? (remPriceVal !== null ? fmt(remPriceVal) : null)
+    : '$280,000';
   if (remVal) {
     ctx.font = `bold ${P[m].RS}px Arial, sans-serif`;
     ctx.fillStyle = colorRem;
@@ -928,8 +1016,9 @@ async function genAll(m) {
     await new Promise(r => setTimeout(r, 5));
     const blob = await new Promise(r => oc.toBlob(r, 'image/jpeg', 0.85));
     const suffix = m === 1 ? '_hotsale' : '_garantia';
+    const mode = document.querySelector(`input[name="m${m}priceMode"]:checked`)?.value || 'sale';
     const fname = (car.title||'banner').replace(/[^\w\s\-]/g,'').trim().replace(/\s+/g,'_') + '_' + (car.id||i) + suffix + '.jpg';
-    blobs[m].push({ blob, fname, title: car.title, carIdx: list[i] });
+    blobs[m].push({ blob, fname, title: car.title, carIdx: list[i], priceMode: mode });
     const url = URL.createObjectURL(blob);
     const div = document.createElement('div');
     div.className = 'thumb-item selected';
